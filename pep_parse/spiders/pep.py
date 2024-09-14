@@ -6,7 +6,7 @@ from pep_parse.items import PepParseItem
 class PepSpider(scrapy.Spider):
     name = 'pep'
     allowed_domains = ['peps.python.org']
-    start_urls = ['https://peps.python.org']
+    start_urls = ['https://peps.python.org/']
 
     def parse(self, response):
         pep_urls = response.css('#numerical-index tbody tr td:nth-child(2) a')
@@ -24,6 +24,3 @@ class PepSpider(scrapy.Spider):
             'status': status
         }
         yield PepParseItem(data)
-
-# дописал возврат items со спарсенными данными,
-# но может в метод parse надо еще что-то добавить ;)
