@@ -9,14 +9,19 @@ class PepSpider(scrapy.Spider):
     start_urls = ['https://peps.python.org/']
 
     def parse(self, response):
-        pep_urls = response.css('#numerical-index tbody tr td:nth-child(2) a')
-        for pep_url in pep_urls:
-            yield response.follow(pep_url, callback=self.parse_pep)
+        pep_rows = response.css('#numerical-index tbody tr')
+        for pep_row in pep_rows:
+            number_pep = int(pep_row.css('td:nth-child(2) a::text').get())
+            name_pep = pep_row.css('td:nth-child(3) a::text').get()
+            keywords = {'number': number_pep, 'name': name_pep}
+            url_pep = pep_row.css('td:nth-child(2) a::attr(href)').get()
+            yield response.follow(
+                url_pep,
+                callback=self.parse_pep,
+                cb_kwargs=keywords
+            )
 
-    def parse_pep(self, response):
-        num_name_list = response.css('h1.page-title::text').get().split(' – ')
-        number = int(num_name_list[0].split()[1])
-        name = num_name_list[1]
+    def parse_pep(self, response, number, name):
         status = response.css('dt:contains("Status") + dd abbr::text').get()
         data = {
             'number': number,
