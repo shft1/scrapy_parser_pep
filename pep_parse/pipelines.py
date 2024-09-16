@@ -14,14 +14,10 @@ class PepParsePipeline():
         return item
 
     def close_spider(self, spider):
-        total_count = sum(list(self.statuses.values())[1:])
-        self.statuses['Total'] = total_count
-        results = list(self.statuses.items())
+        self.statuses['Total'] = sum(list(self.statuses.values())[1:])
         time = dt.datetime.now().strftime(FORMAT_DATE)
         filename = f'status_summary_{time}.csv'
         filepath = BASE_DIR / 'results' / filename
         with open(filepath, 'w', encoding=ENCODING) as csv_file:
             writer_obj = csv.writer(csv_file, dialect=DIALECT)
-            writer_obj.writerow(results[0])
-            writer_obj.writerows(results[1:-1])
-            writer_obj.writerow(results[-1])
+            writer_obj.writerows(list(self.statuses.items()))

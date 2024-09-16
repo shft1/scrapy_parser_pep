@@ -11,17 +11,16 @@ class PepSpider(scrapy.Spider):
     def parse(self, response):
         pep_rows = response.css('#numerical-index tbody tr')
         for pep_row in pep_rows:
-            number_pep = int(pep_row.css('td:nth-child(2) a::text').get())
-            name_pep = pep_row.css('td:nth-child(3) a::text').get()
-            keywords = {'number': number_pep, 'name': name_pep}
             url_pep = pep_row.css('td:nth-child(2) a::attr(href)').get()
             yield response.follow(
                 url_pep,
                 callback=self.parse_pep,
-                cb_kwargs=keywords
+                cb_kwargs={'row': pep_row}
             )
 
-    def parse_pep(self, response, number, name):
+    def parse_pep(self, response, row):
+        number = int(row.css('td:nth-child(2) a::text').get())
+        name = row.css('td:nth-child(3) a::text').get()
         status = response.css('dt:contains("Status") + dd abbr::text').get()
         data = {
             'number': number,
